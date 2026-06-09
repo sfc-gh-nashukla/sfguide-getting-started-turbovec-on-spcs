@@ -1,0 +1,30 @@
+spec:
+  containers:
+    - name: turbovec
+      image: <SNOWFLAKE_ORG>-<SNOWFLAKE_ACCOUNT>.registry.snowflakecomputing.com/turbovec_demo/public/turbovec_repo/turbovec-spcs
+      env:
+        TURBOVEC_DIM: "1536"
+        TURBOVEC_BIT_WIDTH: "4"
+        TURBOVEC_INDEX_PATH: "/data/turbovec_index.tvim"
+      resources:
+        requests:
+          memory: 2Gi
+          cpu: 2
+        limits:
+          memory: 8Gi
+          cpu: 4
+      readinessProbe:
+        port: 8000
+        path: /health
+      volumeMounts:
+        - name: index-storage
+          mountPath: /data
+  endpoints:
+    - name: api
+      port: 8000
+      public: false
+  volumes:
+    - name: index-storage
+      source: "@TURBOVEC_DEMO.PUBLIC.INDEXES"
+      uid: 1000
+      gid: 1000

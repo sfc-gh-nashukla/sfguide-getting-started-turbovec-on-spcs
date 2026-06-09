@@ -17,30 +17,7 @@ A quickstart guide for deploying [TurboVec](https://github.com/RyanCodrai/turbov
 
 ## Architecture
 
-```
-┌─────────────────────────────────────────────────────┐
-│                  Snowflake Account                    │
-│                                                       │
-│  ┌─────────────┐    ┌──────────────────────────┐    │
-│  │  Cortex AI  │    │   SPCS Compute Pool       │    │
-│  │  AI_EMBED   │    │  ┌────────────────────┐   │    │
-│  │  AI_COMPLETE│    │  │  TurboVec Service   │   │    │
-│  └──────┬──────┘    │  │  (FastAPI + Rust)   │   │    │
-│         │           │  │  - /add             │   │    │
-│         │           │  │  - /search          │   │    │
-│         │           │  │  - /search(filter)  │   │    │
-│         │           │  │  - /telemetry       │   │    │
-│         │           │  └────────────────────┘   │    │
-│         │           └──────────────────────────┘    │
-│         │                        │                    │
-│         ▼                        ▼                    │
-│  ┌─────────────────────────────────────────────┐    │
-│  │          Snowflake Tables                     │    │
-│  │  - Documents / embeddings                     │    │
-│  │  - Telemetry / cost attribution               │    │
-│  └─────────────────────────────────────────────┘    │
-└─────────────────────────────────────────────────────┘
-```
+![TurboVec on SPCS Architecture](assets/architecture.png)
 
 ## Prerequisites
 

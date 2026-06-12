@@ -3,7 +3,7 @@
 Reproducible benchmark: TurboVec vs FAISS on Qdrant/DBpedia OpenAI 1536-dim.
 
 Dataset: Qdrant/dbpedia-entities-openai3-text-embedding-3-large-1536-1M (HuggingFace)
-Vectors: 10K database, 100 queries (pre-embedded by OpenAI text-embedding-3-large)
+Vectors: 100K database, 1000 queries (pre-embedded by OpenAI text-embedding-3-large)
 
 Anyone can reproduce:
   pip install turbovec faiss-cpu numpy datasets
@@ -20,26 +20,40 @@ RESULTS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "re
 
 DIM = 1536
 BIT_WIDTH = 4
-N_DATABASE = 10000
-N_QUERIES = 100
+N_DATABASE = 100000
+N_QUERIES = 1000
 K_VALUES = [1, 5, 10, 50]
 SEED = 42
 
 def load_data():
     path = os.path.join(DATA_DIR, "openai-1536.npy")
-    if not os.path.exists(path):
-        print("Dataset not found. Downloading from HuggingFace...")
+    export_dir = os.path.join(DATA_DIR, "export")
+
+    if os.path.exists(path) and os.path.getsize(path) > 500_000_000:
+        all_vecs = np.load(path)
+    elif os.path.exists(os.path.join(export_dir, "dbpedia_shard_00.parquet")):
+        import pyarrow.parquet as pq
+        print("Loading from parquet shards...")
+        shards = sorted([f for f in os.listdir(export_dir) if f.startswith("dbpedia_shard_")])
+        all_embeddings = []
+        for shard_file in shards:
+            table = pq.read_table(os.path.join(export_dir, shard_file))
+            all_embeddings.extend(table["embedding"].to_pylist())
+        all_vecs = np.array(all_embeddings, dtype=np.float32)
+        np.save(path, all_vecs)
+        print(f"Cached to {path}")
+    else:
+        print(f"Dataset not found. Downloading 101K vectors from HuggingFace...")
         from datasets import load_dataset
         ds = load_dataset(
             "Qdrant/dbpedia-entities-openai3-text-embedding-3-large-1536-1M",
-            split="train[:10100]"
+            split="train[:101000]"
         )
-        ds.set_format("numpy")
-        vecs = np.stack([np.array(row, dtype=np.float32) for row in ds["text-embedding-3-large-1536-embedding"]])
+        all_embeddings = ds["text-embedding-3-large-1536-embedding"]
+        all_vecs = np.array(all_embeddings, dtype=np.float32)
         os.makedirs(DATA_DIR, exist_ok=True)
-        np.save(path, vecs)
+        np.save(path, all_vecs)
 
-    all_vecs = np.load(path)
     rng = np.random.RandomState(SEED)
     idx = rng.permutation(len(all_vecs))
     database = all_vecs[idx[:N_DATABASE]].astype(np.float32)

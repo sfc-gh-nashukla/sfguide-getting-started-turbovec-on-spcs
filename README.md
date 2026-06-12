@@ -36,11 +36,9 @@ Dataset: [Qdrant/DBpedia OpenAI 1536-dim](https://huggingface.co/datasets/Qdrant
 
 | Method | Recall@5 | Latency | Memory | Training |
 |--------|----------|---------|--------|----------|
-| Snowflake Native (FP32) | 1.000 | ~500ms (warehouse) | 585.9 MB | N/A |
-| **TurboVec 4-bit (SPCS)** | **1.000** | **13ms** | **73.6 MB** | **None** |
+| Snowflake Native (FP32) | 1.000 | ~707ms (warehouse) | 585.9 MB | N/A |
+| **TurboVec 4-bit (SPCS)** | **0.96** | **11ms** | **73.2 MB** | **None** |
 | FAISS PQ (local, 100K) | 0.964 | 0.86ms | 146.5 MB | 12.7s |
-
-Tested on Snowflake account SFSENORTHAMERICA-NAVNIT_AWS_CAPSTONE with CPU_X64_S compute pool.
 
 ## Why TurboVec on SPCS?
 
